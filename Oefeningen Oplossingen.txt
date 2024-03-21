@@ -1,0 +1,475 @@
+opgave:
+Geef per team de verloren wedstrijden. Zorg dat teams zonder verloren wedstrijden ook in de output verschijnen.
+Duid per wedstrijd aan of het om een actief bestuurslid gaat.
+Sorteer op divisie en wedstrijdnummer.
+output:
+
+teamnr	divisie	wedstrijdnr	spelersnr	bestuurslid
+1	ere	2	6	actief
+1	ere	5	83	-
+1	ere	6	2	actief
+1	ere	8	8	actief
+2	tweede	11	112	actief
+2	tweede	12	112	actief
+2	tweede	13	8	actief
+
+jouw antwoord:
+SELECT t.teamnr, divisie, wedstrijdnr, w.spelersnr,
+CASE 
+WHEN functie IS NOT NULL THEN 'actief'
+ELSE '-'END AS bestuurslid 
+FROM teams t LEFT OUTER JOIN wedstrijden w ON t.teamnr = w.teamnr
+AND verloren > gewonnen
+LEFT OUTER JOIN bestuursleden b ON b.spelersnr = w.spelersnr 
+AND eind_datum IS NULL
+ORDER BY divisie, w.wedstrijdnr
+
+
+opgave:
+Geef van elke speler (die wedstrijden gespeeld heeft en boetes gekregen heeft) wonend in Rijswijk het spelersnr, de naam, de lijst met boetebedragen en de lijst met teams waarvoor hij/zij een wedstrijd gespeeld heeft. Geef het resultaat volgens oplopend spelersnr en boetebedrag.
+output:
+spelersnr	naam	bedrag	teamnr
+8	Niewenburg	25.00	1
+8	Niewenburg	25.00	2
+44	Bakker, de	25.00	1
+44	Bakker, de	30.00	1
+44	Bakker, de	75.00	1
+jouw antwoord:
+select s.spelersnr, naam, bedrag, teamnr
+from spelers s inner join boetes b on s.spelersnr = b.spelersnr
+inner join wedstrijden w on w.spelersnr = s.spelersnr
+where plaats like 'Rijswijk'
+order by s.spelersnr, bedrag
+
+
+opgave:
+Maak een lijst van alle mannelijke aanvoerders van een team en hun gespeelde wedstrijden.
+Hierbij toon je voor deze spelers het spelersnummer en de volledige naam, voor het team de divisie en voor de wedstrijd het wedstrijdnummer.
+Sorteer ook aflopend op het wedstrijdnummer.
+toon output
+kolomhoofdingen:
+spelersnr	naam	voorletters	divisie	wedstrijdnr
+jouw antwoord:
+select s.spelersnr, naam, voorletters, divisie, wedstrijdnr
+from spelers s inner join teams t on s.spelersnr = t.spelersnr
+inner join wedstrijden w on w.spelersnr = s.spelersnr
+where geslacht like 'M'
+order by wedstrijdnr desc
+
+
+opgave:
+Geef een lijst met alle planeten en per planeet zijn satellieten.
+Sorteer op planeet en daarna op satelliet.
+output:
+planeet	maan
+Aarde	Maan
+Jupiter	Adrastea
+Jupiter	Amalthea
+Jupiter	Ananke
+Jupiter	Calisto
+Jupiter	Carme
+Jupiter	Elara
+Jupiter	Europa
+Jupiter	Ganymedes
+Jupiter	Himalia
+Jupiter	Io
+Jupiter	Leda
+Jupiter	Lysithea
+Jupiter	Metis
+Jupiter	Pasiphaë
+Jupiter	Sinope
+Jupiter	Thebe
+Mars	Deimos
+Mars	Phobos
+Mercurius	
+Neptunus	Despina
+Neptunus	Galathea
+Neptunus	Larissa
+Neptunus	Naiad
+Neptunus	Nereïde
+Neptunus	Proteus
+Neptunus	Thalassa
+Neptunus	Triton
+Pluto	Charon
+Saturnus	Atlas
+Saturnus	Calypso
+Saturnus	Dione
+Saturnus	Enceladus
+Saturnus	Epimetheus
+Saturnus	Helene
+Saturnus	Hyperion
+Saturnus	Iapetus
+Saturnus	Janus
+Saturnus	Mimas
+Saturnus	Pan
+Saturnus	Pandora
+Saturnus	Phoebe
+Saturnus	Prometheus
+Saturnus	Rhea
+Saturnus	Telesto
+Saturnus	Tethys
+Saturnus	Titan
+Uranus	Ariel
+Uranus	Belinda
+Uranus	Bianca
+Uranus	Cordelia
+Uranus	Cressida
+Uranus	Desdemona
+Uranus	Juliet
+Uranus	Miranda
+Uranus	Oberon
+Uranus	Ophelia
+Uranus	Portia
+Uranus	Puck
+Uranus	Rosalind
+Uranus	Titania
+Uranus	Umbriel
+Venus	
+jouw antwoord:
+SELECT h1.objectnaam as planeet, h2.objectnaam as maan
+FROM 
+(SELECT h.objectnaam
+FROM hemelobjecten h
+WHERE h.satellietvan = 'Zon') as h1 LEFT OUTER JOIN hemelobjecten h2 ON h1.objectnaam = h2.satellietvan
+ORDER BY h1.objectnaam, h2.objectnaam
+
+
+opgave:
+Bereken voor alle hemelobjecten die satellieten hebben, het aantal satellieten per hemelobject.
+De lijst moet dalend gesorteerd worden op basis van het aantal satellieten van de hemelobjecten en daarna alfabetisch op basis van objectnaam.
+toon output
+kolomhoofdingen:
+objectnaam	count
+jouw antwoord:
+SELECT h.satellietvan AS objectnaam, count(*)
+FROM hemelobjecten h
+GROUP BY h.satellietvan
+HAVING h.satellietvan IS NOT NULL
+ORDER BY count(*) DESC, h.satellietvan
+
+
+opgave:
+Geef de leeftijd van de jongste klant op moment van vertrek.
+output:
+jongsteleeftijd
+37
+jouw antwoord:
+SELECT FLOOR(EXTRACT(YEAR FROM r.vertrekdatum) - EXTRACT(YEAR FROM k.geboortedatum)) - 1 AS jongsteleeftijd
+FROM klanten k 
+INNER JOIN deelnames d ON k.klantnr = d.klantnr
+INNER JOIN reizen r ON r.reisnr = d.reisnr
+ORDER BY jongsteleeftijd
+LIMIT 1
+
+
+opgave:
+Geef de spelersgegevens van de speler(s) met het hoogste bedrag (voor één boete, niet het totaalbedrag). Als twee spelers een even hoge boete gehad hebben, moeten beide spelers getoond worden (LIMIT is dus geen optie).
+Sorteer alfabetisch op naam en voorletters.
+toon output
+kolomhoofdingen:
+spelersnr	voorletters	naam
+jouw antwoord:
+select s.spelersnr, s.voorletters, s.naam
+FROM spelers s INNER JOIN boetes b ON s.spelersnr = b.spelersnr
+WHERE bedrag = 
+(SELECT max(bedrag)
+FROM boetes)
+ORDER BY 3,2
+
+
+opgave:
+Geef een lijst van alle spelers (spelersnr en woonplaats) die met minstens twee in dezelfde plaats wonen. Sorteer aflopend op woonplaats, daarna op spelersnr.
+toon output
+kolomhoofdingen:
+spelersnr	plaats
+jouw antwoord:
+select s.spelersnr, s.plaats
+FROM spelers s
+WHERE s.plaats = 
+(SELECT plaats
+FROM spelers s2
+WHERE s.plaats = s2.plaats
+GROUP BY plaats
+HAVING count(plaats) > 1)
+ORDER BY 2 DESC, 1
+
+
+opgave:
+Geef van elke speler het spelersnr, de naam en het verschil tussen zijn of haar jaar van toetreding en het gemiddeld jaar van toetreding van de spelers die in dezelfde plaats wonen. Sorteer op spelersnr. Zet het berekende verschil om naar het datatype numeric met precisie 5 en schaal 3.
+toon output
+kolomhoofdingen:
+spelersnr	naam	voorletters	numeric
+jouw antwoord:
+select spelersnr, naam, voorletters,
+round(jaartoe - (select avg(jaartoe) 
+				 from spelers s2
+				 where s2.plaats = s.plaats), 3) as numeric
+from spelers s
+order by 1
+
+
+opgave:
+Geef voor elke aanvoerder het spelersnr, de naam en het aantal boetes dat voor hem of haar betaald is en het aantal teams dat hij of zij aanvoert. Aanvoerders zonder boetes mogen niet getoond worden. Sorteer, beginnend bij de eerste kolom, eindigend bij de laatste kolom.
+toon output
+kolomhoofdingen:
+spelersnr	naam	voorletters	aantalboetes	aantalteams
+jouw antwoord:
+select spelersnr, naam, voorletters,
+(select count(bedrag) from boetes b where b.spelersnr = s.spelersnr) as aantalboetes, 
+(select count(teamnr) from teams t
+ where s.spelersnr = t.spelersnr) as aantalteams
+ from spelers s
+ inner join boetes using (spelersnr)
+ inner join teams using (spelersnr)
+ group by spelersnr
+ order by 1,2,3,4,5
+			
+
+opgave:
+Geef van alle spelers het verschil tussen het jaar van toetreding en het geboortejaar, maar geef alleen die spelers waarvan dat verschil groter is dan 20. Sorteer deze gegevens beginnend bij de eerste kolom, eindigend bij de laatste kolom.
+toon output
+kolomhoofdingen:
+spelersnr	naam	voorletters	toetredingsleeftijd
+jouw antwoord:
+select spelersnr, naam, voorletters, jaartoe-extract(year from geb_datum) as toetredingsleeftijd
+from spelers
+where jaartoe-extract(year from geb_datum) > 20
+order by 1,2,3,4
+			
+
+opgave:
+Je kan per speler berekenen hoeveel boetes die speler heeft gehad en wat het totaalbedrag per speler is. Pas nu deze querie aan zodat per verschillend aantal boetes wordt getoond hoe vaak dit aantal boetes voorkwam.Sorteer eerst op de eerste kolom en daarna op de tweede kolom.
+toon output
+kolomhoofdingen:
+a	count
+jouw antwoord:
+SELECT b1.aantalboetes AS a, COUNT(spelersnr)
+FROM 
+(SELECT spelersnr, COUNT(*) AS aantalboetes
+FROM boetes 
+GROUP BY spelersnr) AS b1
+GROUP BY b1.aantalboetes
+ORDER BY b1.aantalboetes, count(spelersnr)
+
+
+opgave:
+Geef van elke speler het spelersnr, de naam en het verschil tussen zijn of haar jaar van toetreding en het gemiddeld jaar van toetreding van de spelers die in dezelfde plaats wonen. Sorteer op spelersnr. Toon 3 getallen na de komma, zet het verschil om naar het numeric type met precisie van 5 en een schaal van 3.
+output:
+spelersnr	naam	voorletters	numeric
+2	Elfring	R	-4.857
+6	Permentier	R	-2.857
+7	Wijers	GWS	1.143
+8	Niewenburg	B	0.000
+27	Cools	DD	-0.500
+28	Cools	C	0.000
+39	Bischoff	D	0.143
+44	Bakker, de	E	0.000
+57	Bohemen, van	M	5.143
+83	Hofland	PK	2.143
+95	Meuleman	P	0.000
+100	Permentier	P	-0.857
+104	Moerman	D	0.500
+112	Baalen, van	IP	0.000
+jouw antwoord:
+select s.spelersnr, s.naam, s.voorletters, 
+round((jaartoe - (select avg(jaartoe) from spelers where s.plaats = plaats)), 3) as numeric
+from spelers s
+order by s.spelersnr
+
+
+opgave:
+Geef voor elke speler die een wedstrijd heeft gespeeld het spelersnr en het totaal aantal boetes. Spelers die een wedstrijd gespeeld hebben, maar geen boetes hebben, moeten ook getoond worden.
+Sorteer op het aantal boetes en op spelersnr;
+output:
+spelersnr	aantalboetes
+6	1
+8	1
+104	1
+27	2
+44	3
+2	
+57	
+83	
+112	
+jouw antwoord:
+select w.spelersnr, aantalboetes
+from wedstrijden w
+	left outer join (select spelersnr, count(*) as aantalboetes
+					 from boetes
+					 group by spelersnr) as q on q.spelersnr = w.spelersnr
+group by w.spelersnr, aantalboetes
+order by aantalboetes, w.spelersnr
+
+
+opgave:
+Geef alle spelers die geen wedstrijd voor team 1 heeft gespeeld. Sorteer op naam, daarna op nr.
+toon output
+kolomhoofdingen:
+spelersnr	naam
+jouw antwoord:
+SELECT spelersnr, naam
+FROM spelers
+WHERE spelersnr NOT IN
+	(SELECT spelersnr
+	FROM wedstrijden
+	WHERE teamnr = 1)
+order by 2,1
+
+
+opgave:
+Geef het totaal aantal boetes, het totale boetebedrag, het minimum en het maximum boetebedrag dat door onze club betaald werd. Let er hierbij op dat er gehele getallen worden getoond (rond af indien nodig). Sorteer van voor naar achter, oplopend. Deze opgave behoeft geen subquery.
+output:
+aantal_boetes	totaal_bedrag	minimum	maximum
+8	480	25	100
+jouw antwoord:
+SELECT COUNT(bedrag) AS aantal_boetes, ROUND(SUM(bedrag),0) AS totaal_bedrag, ROUND(MIN(bedrag),0) AS minimum, ROUND(MAX(bedrag),0) AS maximum
+FROM boetes
+
+
+opgave:
+Maak een lijst met alle spelers die ooit een boete gekregen hebben die hoger is dan 50 euro. Geen dubbels. Sorteer van voor naar achter.
+toon output
+kolomhoofdingen:
+naam	voorletters	plaats
+jouw antwoord:
+select distinct naam, voorletters, plaats
+from spelers inner join boetes using(spelersnr)
+where bedrag > 50
+order by 1,2,3
+
+
+
+opgave:
+Geef van elke boete het betalingsnr, het boetebedrag en het percentage dat het bedrag uitmaakt van de som van alle bedragen. Sorteer deze data op het betalingsnr. Zorg dat er maar twee getallen na de komma getoond worden (rond af). Sorteer van voor naar achter.
+toon output
+kolomhoofdingen:
+betalingsnr	bedrag	round
+jouw antwoord:
+select b1.betalingsnr,b1.bedrag,
+round(b1.bedrag/(select sum(b2.bedrag)
+				 from boetes b2)*100,2)
+from boetes b1
+order by 1,2,3
+
+
+opgave:
+Geef chronologisch de bestuursleden die voorzitter zijn of geweest zijn (chronologisch op begindatum van het voorzitterschap) met vermelding van deze begindatum, alsook hun naam en huidig adres.
+Als het vollegie adres niet gekend is dan moet “adres ongekend” weergegeven worden. Sorteer van voor naar achter.
+toon output
+kolomhoofdingen:
+begin_datum	naam	adres
+jouw antwoord:
+select min(begin_datum) as begin_datum, naam, 
+	case 
+		when straat is null or huisnr is null or plaats is null or postcode is null
+			then 'adres ongekend'
+		else straat|| ' ' ||huisnr|| ' ' ||plaats ||' '||postcode 
+		end as adres
+from spelers inner join bestuursleden using(spelersnr)
+where functie = 'Voorzitter'
+group by spelersnr
+order by 1,2,3
+
+
+opgave:
+Geef een overzicht van de boetebedragen, aantal gewonnen en verloren sets en aantal verschillende functies. Bekijk de output voor de manier hoe het getoond moet worden.
+Sorteer van links naar rechts.
+Tip: Het lijkt onlogisch, maar zelfs NULL krijgt een datatype en kan niet impliciet wijzigen van datatype.
+toon output
+kolomhoofdingen:
+boetebedrag	aantalgewonnen	aantalverloren	aantalfuncties
+jouw antwoord:
+select sum(bedrag) as boetebedrag, null::integer as aantalgewonnen, null::integer as aantalverloren, null::integer as aantalfuncties
+from boetes
+union
+select null, sum(gewonnen), null, null
+from wedstrijden
+union
+select null, null, sum(verloren), null
+from wedstrijden
+union
+select null, null, null, count(distinct functie)
+from bestuursleden
+
+order by 1,2,3,4
+
+
+opgave:
+Geef een lijst met alle spelersnrs, naam en het aantalwedstrijden ze gespeeld hebben en op een nieuwe lijn het aantal bestuursfuncties die ze hebben/hadden.
+Spelers die zowel wedstrijden gespeeld hebben als bestuurslid zijn, komen dus twee keer voor in het resultaat.
+Sorteer op spelersnr en aantal. Geen dubbels tonen.
+output:
+nr	naam	aantal
+2	Elfring	1
+2	Elfring	2
+6	Permentier	3
+6	Permentier	4
+8	Niewenburg	2
+8	Niewenburg	4
+27	Cools	1
+27	Cools	3
+44	Bakker, de	1
+57	Bohemen, van	1
+83	Hofland	1
+95	Meuleman	1
+104	Moerman	1
+112	Baalen, van	2
+jouw antwoord:
+select spelersnr as nr, naam, count(wedstrijdnr) as aantal
+from spelers inner join wedstrijden using(spelersnr)
+group by spelersnr, naam
+
+union
+
+select spelersnr, naam, count(functie)
+from spelers inner join bestuursleden using(spelersnr)
+group by spelersnr, naam
+
+order by 1,3
+
+
+opgave:
+Geef een overzicht van alle spelers, gevolgd door alle bestuursleden, gesorteerd op jaar van toetreding of beginjaar van hun functie en vervolgens op spelersnr.
+Geen dubbels tonen.
+output:
+veld1	veld2	veld3
+95	Meuleman	1972
+2	Elfring	1975
+6	Permentier	1977
+100	Permentier	1979
+8	Niewenburg	1980
+39	Bischoff	1980
+44	Bakker, de	1980
+7	Wijers	1981
+83	Hofland	1982
+27	Cools	1983
+28	Cools	1983
+104	Moerman	1984
+112	Baalen, van	1984
+57	Bohemen, van	1985
+2	Voorzitter	1990
+6	Secretaris	1990
+8	Penningmeester	1990
+27	Lid	1990
+6	Lid	1991
+8	Secretaris	1991
+27	Penningmeester	1991
+6	Penningmeester	1992
+57	Secretaris	1992
+112	Lid	1992
+6	Voorzitter	1993
+8	Lid	1993
+27	Penningmeester	1993
+2	Lid	1994
+8	Lid	1994
+95	Penningmeester	1994
+112	Secretaris	1994
+jouw antwoord:
+select spelersnr as veld1, naam as veld2, jaartoe as veld3
+from spelers
+union
+select spelersnr, functie, extract(year from begin_datum)
+from bestuursleden
+order by 3,1
+
+
