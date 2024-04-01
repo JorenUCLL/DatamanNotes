@@ -472,4 +472,46 @@ select spelersnr, functie, extract(year from begin_datum)
 from bestuursleden
 order by 3,1
 
+opgave:
+Geef de deelnemers waarbij hun aantal reizen die ze ondernemen groter is dan alle hemelobjecten (die niet beginnen met de letter 'M') hun aantal keren dat ze bezocht zijn. Of anders geformuleerd:
+Geef de deelnemers met meer deelnames dan het grootste aantal bezoeken aan een hemelobject dat niet met de letter 'M' begint (:deze deelnemer meer deelnames heeft dan de "grootste" .. = deze deelnemer heeft meer deelnames dan "alle" ..)
+Sorteer op klantnr.
+toon output
+kolomhoofdingen:
+klantnr	vnaam	naam	aantaldeelnames
+jouw antwoord:
+select klantnr, vnaam, naam, count(reisnr) as aantaldeelnames
+from klanten
+inner join deelnames using(klantnr)
+group by klantnr, vnaam, naam
+having count(reisnr) > (select max(nrsom)
+						from (select count(reisnr) as nrsom
+							  from hemelobjecten
+							  inner join bezoeken using(objectnaam)
+							  where objectnaam not like 'M%'
+							  group by objectnaam
+							 ) as reisje
+					   )
+order by 1
+
+
+Geef de diameter van het grootste hemellichaam dat bezocht is op de vroegste reis waar klantnr 126 niet op meegegaan is.
+toon output
+kolomhoofdingen:
+grootste
+jouw antwoord:
+select max(diameter) as grootste
+from hemelobjecten
+inner join bezoeken using (objectnaam)
+inner join (select reisnr, vertrekdatum
+	from reizen
+	inner join deelnames using(reisnr)
+	where klantnr != 126) as reis using(reisnr)
+where vertrekdatum = (select min(vertrekdatum)
+					  from reizen)
+			
+aantal pogingen: 2
+laatste poging: 28/03/24 15u00
+
+
 

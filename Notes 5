@@ -1,0 +1,15 @@
+# Connection Pooling
+
+Cache van database connecties die klaar staat voor ons en hergebruikt kan worden.
+client of service side, of beide
+
+Zonder pooling: direct met databank geconecteerd.
+Met pooling: eerst naar pool, niet rechtstreeks naar databank.
+
+Zonder pooling: databank connecties zijn dure operaties. elke connectie vraagt geheugen.
+Met Pooling: verbindingen kunnen worden gebundeld, minder geheugen nodig.
+
+
+
+
+
